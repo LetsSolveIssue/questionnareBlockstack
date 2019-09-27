@@ -4,6 +4,9 @@ import { Switch, Route,withRouter } from "react-router-dom";
 import  AdminusernamePostsRoutes  from "../_username/posts/routes";
 import AdminUsername from "../_username/index";
 import {MyContext} from "../../../components/User/UserProvider";
+import AdminusernameQuestionsRoutes from "../_username/questions/routes";
+import AdminFeedbacks from "../../admin/_username/posts/feedback/feedbacks/index";
+
 class AdminUsernameRoute extends Component {
   static propTypes = {
     match: PropTypes.object.isRequired,
@@ -18,9 +21,9 @@ class AdminUsernameRoute extends Component {
     }
   }
   render() {
-    const { username } = this.props.match.params;
-    
-   
+    const { username,history } = this.props.match.params;
+    console.log(this.props)
+   console.log(username)
     return (
       <Switch>
         <Route
@@ -28,9 +31,18 @@ class AdminUsernameRoute extends Component {
           path={this.props.match.url}
           render={() => <AdminUsername username={username} />}
         />
+           <Route
+         path={`${this.props.match.url}/feedbacks/:post_id`}
+          render={({match}) => <AdminFeedbacks match={match} />}
+        />
         <Route 
-        path={`${this.props.match.url}/posts`}
+        path={`${this.props.match.url}/users`}
         render={({match}) => <AdminusernamePostsRoutes match={match} />}
+        />
+        
+         <Route 
+        path={`${this.props.match.url}/questions`}
+        render={({match}) => <AdminusernameQuestionsRoutes match={match} />}
         />
       </Switch>
     );

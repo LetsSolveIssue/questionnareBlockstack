@@ -5,6 +5,9 @@ import AdminPostCreate from "../posts/create/index";
 import AdminPosts from "../posts/index";
 import AdminPostView from "../posts/_post_id/index";
 import AdminPostEdit from "../posts/_post_id/edit/index";
+import AdminGiveFeedBack from "../posts/feedback/index";
+
+
 class AdminusernamePostsRoutes extends Component {
   state = {};
   static propTypes = {
@@ -12,6 +15,7 @@ class AdminusernamePostsRoutes extends Component {
   };
   render() {
     const { match } = this.props;
+    console.log(this.props)
     console.log(match);
     return (
       <Switch>
@@ -20,6 +24,7 @@ class AdminusernamePostsRoutes extends Component {
           path={this.props.match.url}
           render={() => <AdminPosts />}
         />
+       
         <Route
           path={`${this.props.match.url}/create`}
           render={() => <AdminPostCreate />}
@@ -33,6 +38,10 @@ class AdminusernamePostsRoutes extends Component {
           path={`${this.props.match.url}/:post_id/edit`}
           render={({match}) =><AdminPostEdit match={match} />}
         />
+        <Route
+              path={`${this.props.match.url}/:post_id/giveFeedback`}
+              render={({ match }) => <AdminGiveFeedBack match={match} />}
+            />
       </Switch>
     );
   }

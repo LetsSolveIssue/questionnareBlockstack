@@ -4,101 +4,158 @@ import _ from "lodash";
 import { Button, Table } from "react-bulma-components";
 import { withRouter } from "react-router-dom";
 import { POST_FILENAME } from "../../utils/constants";
+import Loader from "../Loader/index";
 
 class PostsTable extends Component {
   state = {
-    posts: []
+    posts: [],
+    users: [],
+    loading: true
   };
   static propTypes = {
-    deletePost : PropTypes.func.isRequired,
+    deleteUser: PropTypes.func.isRequired,
     userSession: PropTypes.object.isRequired,
     username: PropTypes.string.isRequired,
-    history : PropTypes.object.isRequired
-    //  posts : PropTypes.array.isRequired
+    history: PropTypes.object.isRequired,
+    type: PropTypes.string
   };
   componentDidMount() {
-    console.log("componentmount");
     this.loadPosts();
+    this.loadUsers();
   }
+  loadUsers = async () => {
+    const options = {
+      decrypt: false
+    };
+    try {
+      const { userSession } = this.props;
+      const result = await userSession.getFile(`users.json`, options);
+      if (!result) {
+        throw new Error("Post file  doesnot exist");
+      }
 
+      return this.setState({ users: JSON.parse(result), loading: false });
+    } catch (e) {
+      console.log(e.message);
+    }
+  };
   loadPosts = async () => {
     const options = {
       decrypt: false
     };
     try {
       const { userSession } = this.props;
-      const result =await userSession.getFile(POST_FILENAME, options);
+      const result = await userSession.getFile(POST_FILENAME, options);
       if (!result) {
         throw new Error("Post file  doesnot exist");
       }
-      console.log(result);
-
       return this.setState({ posts: JSON.parse(result) });
     } catch (e) {
       console.log(e.message);
     }
   };
-  viewAdminPost(post){
- const {history,username} =this.props;
- console.log(post)
-  return history.push(`/admin/${username}/posts/${post.id}`)
+  viewAdminPost(post) {
+    const { history, username } = this.props;
+
+    return history.push(`/admin/${username}/feedbacks/${post.id}`);
   }
-  editAdminPost(post){
-    const {history,username} =this.props;
-    console.log(post)
-     return history.push(`/admin/${username}/posts/${post.id}/edit`)
-     }
-     deleteAdminPost(post){
-       console.log(post)
-       this.props.deletePost(post.id)
-     }
-  displayAdminOptions(post) {
+  editAdminPost(post) {
+    const { history, username } = this.props;
+
+    return history.push(`/admin/${username}/users/${post.id}/edit`);
+  }
+  deleteAdminPost(post) {
+   
+     this.props.deleteUser(post.id)
+  }
+  viewPost(post) {
+    const { history, username } = this.props;
+
+    return history.push(`/${username}/posts/${post.id}`);
+  }
+  feedbackAdminPost(user) {
+    const { history, username } = this.props;
+
+    return history.push(`/admin/${username}/users/${user.id}/giveFeedback`);
+  }
+  displayAdminOptions(user) {
     return (
       <React.Fragment>
         <Button
           className="mr-one"
           color="warning"
-          onClick={() => this.editAdminPost(post)}
+          onClick={() => this.editAdminPost(user)}
         >
           Edit
         </Button>
         <Button
           className="mr-one"
           color="info"
-          onClick={() => this.viewAdminPost(post)}
+          onClick={() => this.viewAdminPost(user)}
         >
-          View
+          View Feedback
         </Button>
         <Button
-          color="danger"
-          onClick={() => this.deleteAdminPost(post)}
+          className="mr-one"
+          color="info"
+          onClick={() => this.feedbackAdminPost(user)}
         >
+          Give Feedback
+        </Button>
+        <Button color="danger" onClick={() => this.deleteAdminPost(user)}>
           Delete
         </Button>
       </React.Fragment>
     );
   }
+  displayPublicOptions(post) {
+    return (
+      <React.Fragment>
+        <Button
+          className="mr-one"
+          color="info"
+          onClick={() => this.viewPost(post)}
+        >
+          View
+        </Button>
+      </React.Fragment>
+    );
+  }
   render() {
-    const { posts } = this.state;
+    
+    
+      const { users } = this.props;
+      const { loading } = this.state;
+    if (loading) {
+      return <Loader />;
+    }
 
-    console.log(posts);
     return (
       <Table>
         <thead>
           <tr>
             <th>Id</th>
-            <th>Title</th>
-            <th>Option</th>
+            <th>Username</th>
+            <th>Email</th>
+            <th>BlockStackId</th>
+            <th>Department</th>
+            <th>Options</th>
           </tr>
         </thead>
         <tbody>
-          {_.map(posts, (post) => {
-              console.log(post)
+          {_.map(users, user => {
             return (
-              <tr key={post.id}>
-                <td>{post.id}</td>
-                <td>{post.title}</td>
-                <td>{this.displayAdminOptions(post)}</td>
+              <tr key={user.id}>
+                <td>{user.id}</td>
+                <td>{user.personname}</td>
+                <td>{user.email}</td>
+                <td>{user.blockstackId}</td>
+                <td>{user.department}</td>
+                <td>
+                  {this.props.type == "public"
+                    ? this.displayPublicOptions(user)
+                    : this.displayAdminOptions(user)}
+                </td>
               </tr>
             );
           })}
@@ -107,5 +164,7 @@ class PostsTable extends Component {
     );
   }
 }
-
+PostsTable.defaultProp = {
+  type: "admin"
+};
 export default withRouter(PostsTable);

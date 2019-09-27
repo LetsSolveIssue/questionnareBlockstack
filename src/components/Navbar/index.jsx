@@ -36,13 +36,13 @@ class NavbarComp extends Component {
     const { history } = this.props
     const { user } = this.state
   console.log(history , user)
-    return history.push(`/admin/${user.username}/posts`)
+    return history.push(`/admin/${user.username}/users`)
   }
   goToAdminPosts = () => {
     const { history } = this.props
     const { user } = this.state
   console.log(history , user)
-    return history.push(`/admin/${user.username}/posts`)
+    return history.push(`/admin/${user.username}/feedbacks`)
   }
   goToAdminProfile = () => {
     const { history } = this.props
@@ -73,9 +73,9 @@ class NavbarComp extends Component {
                 <Navbar.Item onClick={this.goToUsers}>
                   Users
                 </Navbar.Item>
-                <Navbar.Item onClick={this.goToAdminPosts}>
+                {/* <Navbar.Item onClick={this.goToAdminPosts}>
                   Feedbacks
-                </Navbar.Item>
+                </Navbar.Item> */}
                 <Navbar.Item onClick={this.goToAdminProfile}>
                   My Profile
                 </Navbar.Item>

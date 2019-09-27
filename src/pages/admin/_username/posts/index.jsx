@@ -8,44 +8,45 @@ import _ from "lodash";
 
 class AdminPosts extends Component {
     state ={
-        posts : []
+       
+        users : []
     }
 
   componentDidMount() {
-    this.loadPosts()
+    this.loadUsers()
   }
 
-  loadPosts = async () => {
+  loadUsers = async () => {
     const { userSession } = this.context.state.currentUser
     const options = { decrypt: false }
 
     try {
-      const result = await userSession.getFile(POST_FILENAME, options)
+      const result = await userSession.getFile(`users.json`, options)
 
       if (!result) {
         throw new Error('Posts File does not exist')
       }
 
-      return this.setState({ posts: JSON.parse(result) })
+      return this.setState({ users: JSON.parse(result) })
     } catch (e) {
       console.log(e.message)
     }
   }
-  deletePost = async (postId) => {
+  deleteUser = async (userId) => {
     const { userSession,username } = this.context.state.currentUser;
-    const { posts } = this.state;
+    const { users } = this.state;
     const options = { encrypt: false };
 
-    const filteredPosts = _.filter(posts, (post) => post.id !== postId);
+    const filteredUsers = _.filter(users, (user) => user.id !== userId);
 
     try {
       await userSession.putFile(
-        POST_FILENAME,
-        JSON.stringify(filteredPosts),
+        `users.json`,
+        JSON.stringify(filteredUsers),
         options
       );
-      await userSession.deleteFile(`post-${postId}.json`, options);
-      this.setState({ posts: filteredPosts });
+      //await userSession.deleteFile(`post-${postId}.json`, options);
+      this.setState({ users: filteredUsers });
     
     } catch (e) {
       console.log(e.message);
@@ -55,6 +56,7 @@ class AdminPosts extends Component {
     //   const { posts } =this.state;
     const { userSession, username } = this.context.state.currentUser;
     //  console.log(posts);
+    const { users } = this.state;
     console.log(this.context.state);
     console.log(userSession, username);
     return (
@@ -62,9 +64,10 @@ class AdminPosts extends Component {
         <Card.Content>
           <Content>
             <PostsTable
+              users = { users }
               userSession={userSession}
               username={username}
-              deletePost={this.deletePost}
+              deleteUser={this.deleteUser}
             />
           </Content>
         </Card.Content>

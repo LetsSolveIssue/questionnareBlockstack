@@ -32,7 +32,7 @@ class Routes extends Component {
             render={({ match }) => <AdminUsernameRoute match={match} />}
           />
           <Route 
-          path="/:username/posts"
+          path="/:username/users"
           render={({match})=><UsernamePostsRoute match={match}/>}/>
         </Switch>
       </UserProvider>

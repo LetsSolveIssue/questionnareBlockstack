@@ -8,6 +8,7 @@ import {
   Input,
   Label,
   Textarea,
+  Select,Option
 } from 'react-bulma-components/lib/components/form'
 import {
   Button,
@@ -21,11 +22,19 @@ class PostForm extends Component {
 
   constructor(props){
     super(props);
-const {post= {}} = props
+const {post= {}} = props;
+const { user= {}} = props;
+console.log(user)
     this.state = {
-      title: post.title || '',
-      description: post.description || '',
+      // title: post.title || '',
+      // description: post.description || '',
+      personname : user.personname || '',
+      email :  user.email || '',
+      blockstackId : user.blockstackId || '',
+      department : user.department || '',
       posts: [],
+      users : []
+     
     }
   }
 
@@ -39,105 +48,106 @@ const {post= {}} = props
   }
 
   componentDidMount() {
-    this.loadPosts()
+    this.loadUsers()
   }
 
-  loadPosts = async () => {
+  loadUsers = async () => {
+  
     const { userSession } = this.props
     const options = { decrypt: false }
 
-    const result = await userSession.getFile(`posts.json`, options)
-
+    const result = await userSession.getFile(`users.json`, options)
+    console.log(result)
     if (result) {
-     return this.setState({ posts: JSON.parse(result) })
+     return this.setState({ users: JSON.parse(result) })
     }
-
+     
     return null
   }
    editPost = async () => {
     const options = { encrypt: false }
-    const { title, description, posts } = this.state
-    const { history, userSession, username,post } = this.props
-   
-
+   const { personname, email, blockstackId,department,users } = this.state
+    const { history, userSession, username } = this.props
+ const {user} = this.props;
     // for posts.json
     const params = {
-      id : post.id,
-      title,
+      id : user.id,
+      personname,
+      email,
+      blockstackId,
+      department
+
     }
     console.log(params);
-  //  await userSession.putFile(`random.json`, JSON.stringify(params), options)
-    // for post-${post-id}.json
-    // { id, title, description }
-    const detailParams = {
-      ...params,
-      description
-    }
-   const editedPostForIndex = _.map(posts,(p)=>{
-     if(p.id === post.id){
+ 
+   const editedPostForIndex = _.map(users,(p)=>{
+     if(p.id === user.id){
        return params;
      }
      return p;
    })
 
    try{
-    await userSession.putFile(`posts.json`,JSON.stringify(editedPostForIndex),options);
-    await userSession.putFile(`post-${post.id}.json`,JSON.stringify(detailParams),options);
+    await userSession.putFile(`users.json`,JSON.stringify(editedPostForIndex),options);
+    //await userSession.putFile(`post-${post.id}.json`,JSON.stringify(detailParams),options);
     this.setState({
-      title :'',
-      description :''
-    },history.push(`/admin/${username}/posts`))
+      personname :'',
+      email :'',
+      blockstackId :'',
+      department :'',
+    },() => history.push(`/admin/${username}/users`))
    }catch(e){
     console.log(e.message)
    }
    }
-  createPost = async () => {
+   createUser = async () => {
     const options = { encrypt: false }
-    const { title, description, posts } = this.state
+    const { personname, email, blockstackId,department,users } = this.state
     const { history, userSession, username } = this.props
     const id = generateUUID()
 
     // for posts.json
     const params = {
       id,
-      title,
+      personname,
+      email,
+      blockstackId,
+      department
     }
-    console.log(params);
-  //  await userSession.putFile(`random.json`, JSON.stringify(params), options)
-    // for post-${post-id}.json
-    // { id, title, description }
-    const detailParams = {
-      ...params,
-      description
-    }
-   console.log(posts)
-    try {
-      if(posts.length>0){
-        await userSession.putFile(`posts.json`, JSON.stringify([...posts, params]), options)
-      }else{
-        await userSession.putFile(`posts.json`, JSON.stringify([posts, params]), options)
-      }
-      await userSession.putFile(`post-${id}.json`, JSON.stringify(detailParams), options)
-      this.setState({
-        title: '',
-        description: ''
-      }, () => history.push(`/admin/${username}/posts`))
-    } catch (e) {
-      console.log(e)
-    }
+   
+ 
+   try{
+     if(users.length > 0)
+    await userSession.putFile(`users.json`,JSON.stringify([...users,params]),options)
+    else
+    await userSession.putFile(`users.json`,JSON.stringify([users,params]),options)
+    this.setState({
+      title: '',
+      personname:'',
+      email:'',
+      blockstackId:'',
+      department:''
+    }, () => history.push(`/admin/${username}/users`))
+    
+   }catch(e){
+     console.log(e)
+   }
+   
   }
 
   onChange = (e) => {
+   
     this.setState({
       [e.target.name]: e.target.value
     })
+    console.log(this.state);
   }
 
   onSubmit = (e) => {
     e.preventDefault()
     const { type } = this.props;
 
-    return type === 'edit' ? this.editPost() : this.createPost()
+    return type === 'edit' ? this.editPost() : this.createUser()
   
   }
 
@@ -151,28 +161,54 @@ const {post= {}} = props
            
             <form onSubmit={this.onSubmit} className="post-form">
               <Field>
-                <Label>Title</Label>
+                <Label>Username</Label>
                 <Control>
                   <Input
-                    name="title"
+                    name="personname"
                     onChange={this.onChange}
-                    placeholder="Title of the Post"
-                    value={this.state.title}
+                    placeholder="Name Of person"
+                    value={this.state.personname}
                   />
                 </Control>
               </Field>
               <Field>
-                <Label>Post Description</Label>
+                <Label>Email</Label>
                 <Control>
-                  <Textarea
-                    name="description"
+                  <Input
+                    name="email"
                     onChange={this.onChange}
-                    placeholder="Create Posts here!"
-                    rows={20}
-                    value={this.state.description}
+                    placeholder="Email Of person"
+                    value={this.state.email}
                   />
                 </Control>
               </Field>
+              <Field>
+                <Label>Blockstack Id</Label>
+                <Control>
+                  <Input
+                    name="blockstackId"
+                    onChange={this.onChange}
+                    placeholder="BlockStackId Of person"
+                    value={this.state.blockstackId}
+                  />
+                </Control>
+              </Field>
+              <Field>
+                <Label>
+                  Department
+                </Label>
+                <Control>
+                  <Select name="department" onChange={this.onChange} value={this.state.department}>
+                  <option>Select dropdown</option>
+                  <option value="development">Development</option>
+                  <option value="sales">Sales</option>
+                  <option value="marketing">Marketing</option>
+                  <option value="hr">HR</option>
+                     
+                  </Select>
+                </Control>
+              </Field>
+            
               <Field kind="group">
                  <Control>
                    <Button>Cancel</Button>
